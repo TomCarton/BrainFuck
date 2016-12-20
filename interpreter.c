@@ -15,6 +15,7 @@ int main(int argc, char **argv)
   if (argc != 2)
     goto usage;
 
+
   // input
   FILE *f = NULL;
   if (!(f = fopen(argv[1], "r")))
@@ -27,7 +28,8 @@ int main(int argc, char **argv)
   int clen = fread(code, 1, kMaxCodeSize, f);
   fclose(f);
 
-  // get the scopes (between '[' & ']')
+ 
+ // get the scopes (between '[' & ']')
   int scope[kMaxCodeSize];
 
   int stack[kMaxCodeSize];
@@ -60,10 +62,12 @@ int main(int argc, char **argv)
     return 1;
   }
 
+
   // memory slots
-  short int mem[kMemSize];
+  unsigned char mem[kMemSize];
   memset(mem, 0, kMemSize);
   unsigned int memp = 0;
+
 
   // interpret the code
   for (int cp = 0; cp < clen; ++cp)
