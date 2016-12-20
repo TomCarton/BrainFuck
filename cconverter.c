@@ -6,17 +6,20 @@
 #include <limits.h>
 
 
-static const unsigned int kMemSize = 32;
+static const unsigned int kMaxtabs = 8;
+static const unsigned int kSlotAmount = 32;
 static const unsigned int kMaxCodeSize = 65536;
 
-void tab(FILE *f, unsigned int n)
+char tabs[kMaxtabs + 1] = "\t\t\t\t\t\t\t\t";
+
+char *tab(unsigned int n)
 {
-    char tabs[8 + 1] = "\t\t\t\t\t\t\t\t";
-    if (n < 8)
+    if (n < kMaxtabs)
     {
-        tabs[n] = '\0';
-        fprintf(f, "%s", tabs);
+        return tabs + kMaxtabs - n;
     }
+
+    return tabs;
 }
 
 int main(int argc, char **argv)
@@ -81,11 +84,11 @@ int main(int argc, char **argv)
             "#include <stdio.h>\n"
             "#include <stdlib.h>\n\n"
 
-            "static const unsigned int kMemSize = %d;\n\n"
+            "static const unsigned int kSlotAmount = %d;\n\n"
 
             "int main(int argc, char **argv)\n{\n"
-            "\tunsigned char mem[kMemSize];\n"
-            "\tunsigned int memp = 0;\n\n", kMemSize
+            "\tunsigned char slot[kSlotAmount];\n"
+            "\tunsigned int p = 0;\n\n", kSlotAmount
             );
 
     unsigned int ti = 1;
@@ -94,17 +97,17 @@ int main(int argc, char **argv)
     {
         switch (c)
         {
-            case '[': fprintf(out, "\n"); tab(out, ti); fprintf(out, "while (mem[memp])\n"); tab(out, ti++); fprintf(out, "{\n"); break;
-            case ']': tab(out, --ti); fprintf(out, "}\n\n"); break;
+            case '[': fprintf(out, "\n%swhile (slot[p])\n%s{\n", tab(ti), tab(ti + 1)); ++ti; break;
+            case ']': fprintf(out, "%s}\n\n", tab(--ti)); break;
 
-            case '>': tab(out, ti); fprintf(out, "++memp;\n"); break;
-            case '<': tab(out, ti); fprintf(out, "--memp;\n"); break;
+            case '>': fprintf(out, "%s++p;\n", tab(ti)); break;
+            case '<': fprintf(out, "%s--p;\n", tab(ti)); break;
 
-            case '+': tab(out, ti); fprintf(out, "++mem[memp];\n"); break;
-            case '-': tab(out, ti); fprintf(out, "--mem[memp];\n"); break;
+            case '+': fprintf(out, "%s++slot[p];\n", tab(ti)); break;
+            case '-': fprintf(out, "%s--slot[p];\n", tab(ti)); break;
 
-            case ',': tab(out, ti); fprintf(out, "mem[memp] = getchar();\n\n"); break;
-            case '.': tab(out, ti); fprintf(out, "putchar(mem[memp]);\n\n"); break;
+            case ',': fprintf(out, "%sslot[p] = getchar();\n\n", tab(ti)); break;
+            case '.': fprintf(out, "%sputchar(slot[p]);\n\n", tab(ti)); break;
         }
     }
 
